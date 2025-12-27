@@ -32,4 +32,38 @@
     "imageUrl": "https://images.unsplash.com/photo-1450149632596-3ef25a620fee?auto=format&fit=crop&q=80&w=800",
     "readTime": "6 phút"
   }
+  ,
+  {
+    "id": "p4",
+    "title": "Chinh Phục JavaScript Từ Cơ Bản Đến Nâng Cao",
+    "excerpt": "JavaScript có đường cong học tập khá dốc nhưng đừng lo lắng. Bắt đầu với ES6+…",
+    "content": "<p>Bài viết tổng hợp lộ trình từ cú pháp cơ bản, kiểu dữ liệu, hàm, DOM tới bất đồng bộ (Promise/async/await) và module bundlers.</p><img src=\"https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200\" class=\"rounded-[2rem] my-8 shadow-lg\" /><p>Mẹo: luyện tập đều, viết nhỏ mỗi ngày, và đọc code mẫu.</p>",
+    "category": "Công nghệ",
+    "author": "Bngoc Xinh",
+    "date": "27/12/2025",
+    "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800",
+    "readTime": "7 phút"
+  },
+  {
+    "id": "p5",
+    "title": "Lộ Trình Học Java Hiệu Quả",
+    "excerpt": "Học Java một cách có hệ thống: từ OOP, collection, IO tới Spring Boot và best practices.",
+    "content": "<ul><li>Nắm OOP và generic</li><li>Hiểu JVM, JDK, JRE</li><li>Thực hành với Spring Boot REST API</li></ul><img src=\"https://images.unsplash.com/photo-1551782450-17144c8aebe1?auto=format&fit=crop&q=80&w=1200\" class=\"rounded-[2rem] my-8 shadow-lg\" />",
+    "category": "Kinh nghiệm",
+    "author": "Trương Nguyễn Bảo Ngọc",
+    "date": "27/12/2025",
+    "imageUrl": "https://images.unsplash.com/photo-1551782450-17144c8aebe1?auto=format&fit=crop&q=80&w=800",
+    "readTime": "6 phút"
+  },
+  {
+    "id": "p6",
+    "title": "So Sánh Java và JavaScript - Đừng Nhầm Lẫn",
+    "excerpt": "Nhiều người mới học thường nhầm lẫn giữa Java và JavaScript vì tên gọi tương tự; đây là khác biệt cốt lõi.",
+    "content": "<p>Java là ngôn ngữ kiểu tĩnh chạy trên JVM; JavaScript là ngôn ngữ kiểu động chạy chủ yếu trên trình duyệt và Node.js.</p><img src=\"https://images.unsplash.com/photo-1526378722291-131a9e74f7b4?auto=format&fit=crop&q=80&w=1200\" class=\"rounded-[2rem] my-8 shadow-lg\" /><p>Ứng dụng: Java (backend, Android), JS (frontend, fullstack).</p>",
+    "category": "Lối sống",
+    "author": "Blogger Cute",
+    "date": "27/12/2025",
+    "imageUrl": "https://images.unsplash.com/photo-1526378722291-131a9e74f7b4?auto=format&fit=crop&q=80&w=800",
+    "readTime": "5 phút"
+  }
 ]
