@@ -2,7 +2,48 @@
   "hash": "5f7e7161",
   "configHash": "fec7194e",
   "lockfileHash": "6cd9b985",
-  "browserHash": "0b2dbb11",
-  "optimized": {},
-  "chunks": {}
+  "browserHash": "232cf1ed",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "a147204d",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "f3f8b89b",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "ed34a3f6",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "d364d0f5",
+      "needsInterop": false
+    },
+    "@google/genai": {
+      "src": "../../node_modules/@google/genai/dist/web/index.mjs",
+      "file": "@google_genai.js",
+      "fileHash": "f3ce24d6",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-RJGY7UQO": {
+      "file": "chunk-RJGY7UQO.js"
+    },
+    "chunk-2WFUEI4P": {
+      "file": "chunk-2WFUEI4P.js"
+    },
+    "chunk-5WRI5ZAA": {
+      "file": "chunk-5WRI5ZAA.js"
+    }
+  }
 }
