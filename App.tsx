@@ -103,7 +103,8 @@ const App: React.FC = () => {
   useEffect(() => {
     const loadSharedPosts = async () => {
       try {
-        const res = await fetch('/posts.json', { cache: 'no-cache' });
+        // Bust CDN/browser cache to ensure latest content after redeploy
+        const res = await fetch(`/posts.json?v=${Date.now()}`, { cache: 'no-cache' });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length) {
