@@ -97,6 +97,28 @@ const App: React.FC = () => {
     localStorage.setItem('zenblog_role', role);
   }, [role]);
 
+  // Load shared posts from a static JSON on first load (for Vercel).
+  // This ensures deployed site shows all curated posts instead of only
+  // localStorage drafts from the developer machine.
+  useEffect(() => {
+    const loadSharedPosts = async () => {
+      try {
+        const res = await fetch('/posts.json', { cache: 'no-cache' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length) {
+            setPosts(prev => (prev.length >= data.length ? prev : data));
+          }
+        }
+      } catch (e) {
+        // ignore network errors; fall back to localStorage/INITIAL_POSTS
+      }
+    };
+    loadSharedPosts();
+    // run only on first mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const addPost = (newPost: Post) => {
     setPosts([newPost, ...posts]);
   };

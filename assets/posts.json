@@ -1,0 +1,35 @@
+[
+  {
+    "id": "p1",
+    "title": "Kể chuyện sau ống kính: Bộ ảnh 'Mùa Thu Trong Veo'",
+    "excerpt": "Lần đầu tiên mình thử sức với ánh sáng tự nhiên lúc 5h sáng tại bờ hồ sương mù...",
+    "content": "<h2>Ý tưởng ban đầu</h2><p>Mình muốn tạo ra một cảm giác hoài niệm nhưng vẫn tươi mới. Bộ ảnh này được thực hiện tại một công viên cũ...</p><img src=\"https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1200\" class=\"rounded-[2rem] my-8 shadow-lg\" /><h3>Tips cho các bạn mẫu mới</h3><p>Đừng quá gồng mình, hãy thả lỏng và tương tác với môi trường xung quanh.</p>",
+    "category": "Hậu trường",
+    "author": "Trương Nguyễn Bảo Ngọc",
+    "date": "20/05/2024",
+    "imageUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=800",
+    "readTime": "5 phút"
+  },
+  {
+    "id": "p2",
+    "title": "Concept 'Ánh Sáng Mềm' trong studio",
+    "excerpt": "Một ngày thử nghiệm ánh sáng diffused để tạo cảm giác dịu nhẹ và mơ màng.",
+    "content": "<p>Mình dùng một softbox lớn phía bên trái để tạo vùng sáng đều, kết hợp nền pastel để giữ mood tinh tế.</p><img src=\"https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80&w=1200\" class=\"rounded-[2rem] my-8 shadow-lg\" /><ul><li>Softbox 120cm</li><li>Nền vải màu xanh pastel</li><li>Ống kính 50mm f/1.8</li></ul>",
+    "category": "Kinh nghiệm",
+    "author": "Trương Nguyễn Bảo Ngọc",
+    "date": "11/06/2024",
+    "imageUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80&w=800",
+    "readTime": "4 phút"
+  },
+  {
+    "id": "p3",
+    "title": "Hậu trường buổi chụp 'Vintage Dream'",
+    "excerpt": "Một buổi chiều đầy tiếng cười với team nhỏ và chiếc máy ảnh phim yêu dấu.",
+    "content": "<p>Set đồ: áo ren trắng, váy xòe nhẹ, điểm xuyết hoa khô. Địa điểm: căn gác gỗ với cửa sổ lớn đón nắng vàng.</p><img src=\"https://images.unsplash.com/photo-1450149632596-3ef25a620fee?auto=format&fit=crop&q=80&w=1200\" class=\"rounded-[2rem] my-8 shadow-lg\" />",
+    "category": "Hậu trường",
+    "author": "Trương Nguyễn Bảo Ngọc",
+    "date": "02/08/2024",
+    "imageUrl": "https://images.unsplash.com/photo-1450149632596-3ef25a620fee?auto=format&fit=crop&q=80&w=800",
+    "readTime": "6 phút"
+  }
+]
