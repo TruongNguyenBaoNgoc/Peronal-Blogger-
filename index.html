@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenBlog Cute - Blog Cá Nhân Pastel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #DEF7F7;
+            --primary: #9DE0E5;
+            --secondary: #B8BDDE;
+            --accent: #A6CCE2;
+            --muted: #C5DDE0;
+        }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            scroll-behavior: smooth;
+            background-color: var(--bg-light);
+        }
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .cute-shadow {
+            box-shadow: 0 10px 25px -5px rgba(157, 224, 229, 0.3);
+        }
+        .cute-card {
+            background: white;
+            border-radius: 2rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .cute-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 35px -10px rgba(184, 189, 222, 0.4);
+        }
+        .floating-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.5;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="text-slate-700">
+    <div class="floating-blob w-96 h-96 bg-[#9DE0E5] top-[-10%] left-[-10%]"></div>
+    <div class="floating-blob w-80 h-80 bg-[#B8BDDE] bottom-[-5%] right-[-5%]"></div>
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

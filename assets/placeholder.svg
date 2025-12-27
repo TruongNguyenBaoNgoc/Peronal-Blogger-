@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" role="img" aria-labelledby="title desc">
+  <title id="title">Placeholder image</title>
+  <desc id="desc">Gradient background with centered label text.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9DE0E5" />
+      <stop offset="100%" stop-color="#B8BDDE" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)" rx="24" ry="24" />
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="32" fill="#ffffff" opacity="0.9">
+    Add your image here
+  </text>
+</svg>
