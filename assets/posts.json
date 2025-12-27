@@ -166,4 +166,16 @@
     "imageUrl": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&q=80&w=800",
     "readTime": "7 phút"
   }
+  ,
+  {
+    "id": "p16",
+    "title": "Gắn JavaScript vào trang HTML – Thẻ script và file ngoài",
+    "excerpt": "Cách thêm mã JS vào trang web bằng thẻ <script>, thuộc tính src, và các lưu ý hiện đại.",
+    "content": "<p>Phần này nói về cốt lõi JavaScript và cách chạy trong trình duyệt. Để thử nhanh, ta gắn script vào trang HTML bằng thẻ <code>&lt;script&gt;</code>.</p><h2>Thẻ script cơ bản</h2><pre><code>&lt;!DOCTYPE HTML&gt;\n&lt;html&gt;\n&lt;body&gt;\n  &lt;p&gt;Before the script...&lt;/p&gt;\n  &lt;script&gt;\n    alert('Hello, world!');\n  &lt;/script&gt;\n  &lt;p&gt;...After the script.&lt;/p&gt;\n&lt;/body&gt;\n&lt;/html&gt;</code></pre><p>Trình duyệt sẽ thực thi đoạn mã bên trong khi gặp thẻ <code>&lt;script&gt;</code>.</p><h2>Markup hiện đại</h2><ul><li>Không cần thuộc tính <code>type</code> hay <code>language</code> trong HTML hiện đại.</li><li>Những bình luận bao bọc script là kỹ thuật rất cũ, dùng để ẩn JS khỏi trình duyệt cổ – không cần nữa.</li></ul><h2>Script ngoài (external)</h2><p>Nếu mã dài, nên tách ra file riêng và gắn bằng <code>src</code>:</p><pre><code>&lt;script src="/path/to/script.js"&gt;&lt;/script&gt;</code></pre><p>Có thể dùng đường dẫn tuyệt đối, tương đối, hoặc URL CDN.</p><p>Lưu ý: một thẻ <code>&lt;script&gt;</code> không thể vừa có <code>src</code> vừa có nội dung bên trong. Hãy tách thành hai thẻ nếu cần.</p><h2>Tóm tắt</h2><ul><li>Dùng <code>&lt;script&gt;</code> để thêm JS vào trang.</li><li>Không cần <code>type</code>/<code>language</code> trong hầu hết trường hợp.</li><li>Dùng <code>src</code> để nhúng file ngoài và tận dụng cache của trình duyệt.</li></ul>",
+    "category": "Công nghệ",
+    "author": "Trương Nguyễn Bảo Ngọc",
+    "date": "27/12/2025",
+    "imageUrl": "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&q=80&w=800",
+    "readTime": "6 phút"
+  }
 ]
