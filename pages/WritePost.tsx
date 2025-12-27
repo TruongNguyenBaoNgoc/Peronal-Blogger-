@@ -24,7 +24,7 @@ const WritePost: React.FC<WritePostProps> = ({ onSave, posts = [] }) => {
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const newPost: Post = {
       id: editingPost?.id || Date.now().toString(),
@@ -37,7 +37,7 @@ const WritePost: React.FC<WritePostProps> = ({ onSave, posts = [] }) => {
       imageUrl,
       readTime: Math.ceil(content.split(' ').length / 200) + ' phút'
     };
-    onSave(newPost);
+    await onSave(newPost);
     navigate('/');
   };
 

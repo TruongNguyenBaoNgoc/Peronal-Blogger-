@@ -8,10 +8,14 @@ import About from './pages/About';
 import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
 import WritePost from './pages/WritePost';
+import Login from './pages/Login';
 import { Post } from './types';
 import { INITIAL_POSTS } from './constants';
+import { fetchPosts, upsertPost, deletePostById } from './services/postService';
+import { getSession, onAuthChange, signOut } from './services/authService';
+import { isCurrentUserAdmin } from './services/adminService';
 
-const Navbar = () => {
+const Navbar: React.FC<{ isAdmin: boolean; isAuthed: boolean }> = ({ isAdmin, isAuthed }) => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -30,7 +34,14 @@ const Navbar = () => {
             <Link to="/portfolio" className={`text-sm font-bold transition-all ${isActive('/portfolio') ? 'text-[#B8BDDE] scale-110' : 'text-slate-500 hover:text-[#B8BDDE]'}`}>Portfolio</Link>
             <Link to="/about" className={`text-sm font-bold transition-all ${isActive('/about') ? 'text-[#A6CCE2] scale-110' : 'text-slate-500 hover:text-[#A6CCE2]'}`}>Giới thiệu</Link>
             <Link to="/dashboard" className={`text-sm font-bold transition-all ${isActive('/dashboard') ? 'text-[#DEF7F7] scale-110' : 'text-slate-500 hover:text-[#DEF7F7]'}`}>Dashboard</Link>
-            <Link to="/write" className="bg-[#9DE0E5] text-white px-5 py-2.5 rounded-full text-sm font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95">✨ Đăng bài</Link>
+            {isAdmin ? (
+              <>
+                <Link to="/admin" className={`text-sm font-bold transition-all ${isActive('/admin') ? 'text-[#9DE0E5] scale-110' : 'text-slate-500 hover:text-[#9DE0E5]'}`}>Admin</Link>
+                <Link to="/write" className="bg-[#9DE0E5] text-white px-5 py-2.5 rounded-full text-sm font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95">✨ Đăng bài</Link>
+              </>
+            ) : (
+              <Link to="/login" className={`text-sm font-bold transition-all ${isActive('/login') ? 'text-[#9DE0E5] scale-110' : 'text-slate-500 hover:text-[#9DE0E5]'}`}>Đăng nhập</Link>
+            )}
           </div>
         </div>
       </div>
@@ -55,10 +66,10 @@ const Footer = () => (
 );
 
 const App: React.FC = () => {
-  const [posts, setPosts] = useState<Post[]>(() => {
-    const saved = localStorage.getItem('zenblog_posts');
-    return saved ? JSON.parse(saved) : INITIAL_POSTS;
-  });
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isAuthed, setIsAuthed] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const [role, setRole] = useState<'admin' | 'user'>(() => {
     const saved = localStorage.getItem('zenblog_role');
@@ -66,44 +77,82 @@ const App: React.FC = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem('zenblog_posts', JSON.stringify(posts));
-  }, [posts]);
+    (async () => {
+      const { data } = await getSession();
+      setIsAuthed(!!data.session);
+      onAuthChange(async (a) => {
+        setIsAuthed(a);
+        setIsAdmin(a ? await isCurrentUserAdmin() : false);
+      });
+      if (data.session) {
+        setIsAdmin(await isCurrentUserAdmin());
+      }
+    })();
+    // Load posts from Supabase; if empty, seed initial
+    (async () => {
+      setLoading(true);
+      const data = await fetchPosts();
+      if (data.length === 0) {
+        // seed initial posts once
+        for (const p of INITIAL_POSTS) {
+          await upsertPost(p);
+        }
+        const seeded = await fetchPosts();
+        setPosts(seeded);
+      } else {
+        setPosts(data);
+      }
+      setLoading(false);
+    })();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('zenblog_role', role);
   }, [role]);
 
-  const addPost = (newPost: Post) => {
-    setPosts([newPost, ...posts]);
+  const addPost = async (newPost: Post) => {
+    const ok = await upsertPost(newPost);
+    if (ok) setPosts([newPost, ...posts]);
   };
 
-  const updatePost = (updatedPost: Post) => {
-    setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
+  const updatePost = async (updatedPost: Post) => {
+    const ok = await upsertPost(updatedPost);
+    if (ok) setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
   };
 
-  const deletePost = (id: string) => {
-    setPosts(posts.filter(p => p.id !== id));
+  const deletePost = async (id: string) => {
+    const ok = await deletePostById(id);
+    if (ok) setPosts(posts.filter(p => p.id !== id));
   };
 
   const logoutToUser = () => {
     setRole('user');
+    signOut();
     window.location.href = '#/dashboard';
   };
 
   return (
     <HashRouter>
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <Navbar isAdmin={isAdmin} isAuthed={isAuthed} />
         <main className="flex-grow">
+          {loading && (
+            <div className="max-w-5xl mx-auto px-6 py-8 text-center text-slate-500">Đang tải bài viết...</div>
+          )}
           <Routes>
             <Route path="/" element={<Home posts={posts} />} />
             <Route path="/post/:id" element={<PostView posts={posts} />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/about" element={<About />} />
             <Route path="/dashboard" element={<UserDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} />} />
-            <Route path="/admin" element={<AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />} />
-            <Route path="/write" element={<WritePost onSave={addPost} posts={posts} />} />
-            <Route path="/write/:id" element={<WritePost onSave={updatePost} posts={posts} />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={isAdmin ? (
+              <AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />
+            ) : (
+              <Login />
+            )} />
+            <Route path="/write" element={isAdmin ? (<WritePost onSave={addPost} posts={posts} />) : (<Login />)} />
+            <Route path="/write/:id" element={isAdmin ? (<WritePost onSave={updatePost} posts={posts} />) : (<Login />)} />
           </Routes>
         </main>
         <Footer />
