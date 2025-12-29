@@ -23,7 +23,7 @@ const Home: React.FC<HomeProps> = ({ posts }) => {
             Mình là <span className="text-[#9DE0E5]">{MY_PROFILE.nickname}</span>
           </h1>
           <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-md">
-            Ghi lại những khoảnh khắc đời thường qua lăng kính mộng mơ và những bộ ảnh concept đặc sắc.
+            Trương Nguyễn Bảo Ngọc và nhưng câu chuyện.
           </p>
           <div className="flex gap-4">
             <Link to="/portfolio" className="bg-[#B8BDDE] text-white px-8 py-4 rounded-full font-black uppercase tracking-widest shadow-lg hover:scale-105 transition-all">Xem Gallery</Link>

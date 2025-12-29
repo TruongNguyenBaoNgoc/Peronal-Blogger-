@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import PostView from './pages/PostView';
 import Portfolio from './pages/Portfolio';
@@ -10,10 +10,8 @@ import UserDashboard from './pages/UserDashboard';
 import WritePost from './pages/WritePost';
 import { Post } from './types';
 import { INITIAL_POSTS } from './constants';
-import { fetchPosts as fetchPostsFromDb, upsertPost as upsertPostToDb, deletePost as deletePostFromDb } from './services/postService';
-import { hasSupabase } from './services/supabaseClient';
 
-const Navbar: React.FC<{ role: 'admin' | 'user' }> = ({ role }) => {
+const Navbar: React.FC<{ role: 'admin' | 'user'; onSwitchRole: (role: 'admin' | 'user') => void }> = ({ role, onSwitchRole }) => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -35,6 +33,13 @@ const Navbar: React.FC<{ role: 'admin' | 'user' }> = ({ role }) => {
             {role === 'admin' && (
               <Link to="/write" className="bg-[#9DE0E5] text-white px-5 py-2.5 rounded-full text-sm font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95">✨ Đăng bài</Link>
             )}
+            <button
+              onClick={() => onSwitchRole(role === 'admin' ? 'user' : 'admin')}
+              className="px-4 py-2 text-xs font-bold rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50"
+              title="Chuyển vai trò"
+            >
+              Chế độ: {role === 'admin' ? 'Admin' : 'User'}
+            </button>
           </div>
         </div>
       </div>
@@ -101,24 +106,17 @@ const App: React.FC = () => {
     localStorage.setItem('zenblog_role', role);
   }, [role]);
 
-  // Load shared posts from Supabase if configured; otherwise from static JSON.
-  // Ensures deployed site shows curated content and enables server-side RBAC.
+  // Load shared posts from a static JSON on first load (for Vercel).
+  // This ensures deployed site shows all curated posts instead of only
+  // localStorage drafts from the developer machine.
   useEffect(() => {
     const loadSharedPosts = async () => {
       try {
-        if (hasSupabase) {
-          const data = await fetchPostsFromDb();
+        const res = await fetch('/posts.json', { cache: 'no-cache' });
+        if (res.ok) {
+          const data = await res.json();
           if (Array.isArray(data) && data.length) {
             setPosts(prev => (prev.length >= data.length ? prev : data));
-          }
-        } else {
-          // Bust CDN/browser cache to ensure latest content after redeploy
-          const res = await fetch(`/posts.json?v=${Date.now()}`, { cache: 'no-cache' });
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length) {
-              setPosts(prev => (prev.length >= data.length ? prev : data));
-            }
           }
         }
       } catch (e) {
@@ -130,44 +128,16 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addPost = async (newPost: Post) => {
-    if (role !== 'admin') return; // client-side guard; server-side enforced via Supabase RLS
-    try {
-      if (hasSupabase) {
-        const saved = await upsertPostToDb(newPost);
-        setPosts([saved, ...posts]);
-      } else {
-        setPosts([newPost, ...posts]);
-      }
-    } catch (e) {
-      // noop: surface errors in UI later
-    }
+  const addPost = (newPost: Post) => {
+    setPosts([newPost, ...posts]);
   };
 
-  const updatePost = async (updatedPost: Post) => {
-    if (role !== 'admin') return;
-    try {
-      if (hasSupabase) {
-        const saved = await upsertPostToDb(updatedPost);
-        setPosts(posts.map(p => p.id === saved.id ? saved : p));
-      } else {
-        setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
-      }
-    } catch (e) {
-      // noop
-    }
+  const updatePost = (updatedPost: Post) => {
+    setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
   };
 
-  const deletePost = async (id: string) => {
-    if (role !== 'admin') return;
-    try {
-      if (hasSupabase) {
-        await deletePostFromDb(id);
-      }
-      setPosts(posts.filter(p => p.id !== id));
-    } catch (e) {
-      // noop
-    }
+  const deletePost = (id: string) => {
+    setPosts(posts.filter(p => p.id !== id));
   };
 
   const logoutToUser = () => {
@@ -175,18 +145,10 @@ const App: React.FC = () => {
     window.location.href = '#/dashboard';
   };
 
-  const RequireAdmin: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-    const location = useLocation();
-    if (role !== 'admin') {
-      return <Navigate to="/dashboard" state={{ from: location.pathname }} replace />;
-    }
-    return children;
-  };
-
   return (
     <HashRouter>
       <div className="min-h-screen flex flex-col">
-        <Navbar role={role} />
+        <Navbar role={role} onSwitchRole={(r) => { setRole(r); localStorage.setItem('zenblog_role', r); }} />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home posts={posts} />} />
@@ -194,21 +156,9 @@ const App: React.FC = () => {
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/about" element={<About />} />
             <Route path="/dashboard" element={<UserDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} />} />
-            <Route path="/admin" element={
-              <RequireAdmin>
-                <AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />
-              </RequireAdmin>
-            } />
-            <Route path="/write" element={
-              <RequireAdmin>
-                <WritePost onSave={addPost} posts={posts} />
-              </RequireAdmin>
-            } />
-            <Route path="/write/:id" element={
-              <RequireAdmin>
-                <WritePost onSave={updatePost} posts={posts} />
-              </RequireAdmin>
-            } />
+            <Route path="/admin" element={<AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />} />
+            <Route path="/write" element={<WritePost onSave={addPost} posts={posts} />} />
+            <Route path="/write/:id" element={<WritePost onSave={updatePost} posts={posts} />} />
           </Routes>
         </main>
         <Footer />

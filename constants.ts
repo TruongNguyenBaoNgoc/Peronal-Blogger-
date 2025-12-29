@@ -5,7 +5,7 @@ export const MY_PROFILE: Profile = {
   name: 'Trương Nguyễn Bảo Ngọc',
   nickname: 'Bảo Ngọc',
   role: 'Freelance Model / Concept Creator',
-  bio: 'Mình là Trương Nguyênc Bảo Ngọc, sinh viên năm cuối của Trường Đại Học HUTECH. Đây sẽ là nơi chia sẻ về bản thân mình và nhưng lưu ý mà mình biết được khi đi học',
+  bio: 'Chào cậu, mình là Trương Nguyễn Bảo Ngọc. Một tâm hồn mộng mơ yêu thích lưu giữ những khoảnh khắc qua ống kính. Mình theo đuổi phong cách nhẹ nhàng, trong trẻo nhưng cũng không ngại thử thách với những concept độc lạ.',
   styles: ['Vintage', 'Nàng thơ', 'Street Style', 'High Fashion'],
   avatar: '/z7355132863874_9fe8794bd3b2f2145b1e0669de0129cf.jpg',
   socials: {
