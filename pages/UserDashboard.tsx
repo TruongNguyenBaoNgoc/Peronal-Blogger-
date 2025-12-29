@@ -3,12 +3,13 @@ import { Post } from '../types';
 import { Link } from 'react-router-dom';
 
 interface UserDashboardProps {
+  role?: 'admin' | 'user';
   posts: Post[];
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
 }
 
-const UserDashboard: React.FC<UserDashboardProps> = ({ posts, onDelete, onEdit }) => {
+const UserDashboard: React.FC<UserDashboardProps> = ({ role = 'user', posts, onDelete, onEdit }) => {
   const [statsView] = useState({
     totalPosts: posts.length,
     totalViews: posts.length * Math.floor(Math.random() * 500) + 100,
@@ -22,9 +23,11 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ posts, onDelete, onEdit }
           <h2 className="text-4xl font-serif font-bold text-slate-900 mb-2">Bảo Ngọc Dashboard</h2>
           <p className="text-slate-500">Quản lý nội dung và theo dõi hiệu suất của bạn</p>
         </div>
-        <Link to="/write" className="bg-[#9DE0E5] text-white px-6 py-3 rounded-full font-bold hover:bg-[#8CCFD4] transition-all shadow-md">
-          ✨ Viết bài mới
-        </Link>
+        {role === 'admin' && (
+          <Link to="/write" className="bg-[#9DE0E5] text-white px-6 py-3 rounded-full font-bold hover:bg-[#8CCFD4] transition-all shadow-md">
+            ✨ Viết bài mới
+          </Link>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -101,22 +104,26 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ posts, onDelete, onEdit }
                   <Link to={`/post/${post.id}`} className="inline-block px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-[#9DE0E5] hover:text-white text-xs font-bold rounded-lg transition-all">
                     👁️ Xem
                   </Link>
-                  <button 
-                    onClick={() => onEdit(post.id)}
-                    className="px-3 py-1.5 bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold rounded-lg transition-all"
-                  >
-                    ✏️ Sửa
-                  </button>
-                  <button 
-                    onClick={() => {
-                      if(confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
-                        onDelete(post.id);
-                      }
-                    }}
-                    className="px-3 py-1.5 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white text-xs font-bold rounded-lg transition-all"
-                  >
-                    🗑️ Xóa
-                  </button>
+                  {role === 'admin' && (
+                    <>
+                      <button 
+                        onClick={() => onEdit(post.id)}
+                        className="px-3 py-1.5 bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold rounded-lg transition-all"
+                      >
+                        ✏️ Sửa
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if(confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
+                            onDelete(post.id);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white text-xs font-bold rounded-lg transition-all"
+                      >
+                        🗑️ Xóa
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
@@ -126,9 +133,11 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ posts, onDelete, onEdit }
         {posts.length === 0 && (
           <div className="py-20 text-center text-slate-400">
             <p className="text-lg font-medium mb-4">Chưa có bài viết nào</p>
-            <Link to="/write" className="inline-block bg-[#9DE0E5] text-white px-6 py-3 rounded-full font-bold hover:bg-[#8CCFD4] transition-all">
-              Viết bài đầu tiên nào!
-            </Link>
+            {role === 'admin' && (
+              <Link to="/write" className="inline-block bg-[#9DE0E5] text-white px-6 py-3 rounded-full font-bold hover:bg-[#8CCFD4] transition-all">
+                Viết bài đầu tiên nào!
+              </Link>
+            )}
           </div>
         )}
       </div>

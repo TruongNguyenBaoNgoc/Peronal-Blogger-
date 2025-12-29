@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import PostView from './pages/PostView';
 import Portfolio from './pages/Portfolio';
@@ -11,7 +11,7 @@ import WritePost from './pages/WritePost';
 import { Post } from './types';
 import { INITIAL_POSTS } from './constants';
 
-const Navbar: React.FC<{ role: 'admin' | 'user'; onSwitchRole: (role: 'admin' | 'user') => void }> = ({ role, onSwitchRole }) => {
+const Navbar: React.FC<{ role: 'admin' | 'user' }> = ({ role }) => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -33,13 +33,6 @@ const Navbar: React.FC<{ role: 'admin' | 'user'; onSwitchRole: (role: 'admin' | 
             {role === 'admin' && (
               <Link to="/write" className="bg-[#9DE0E5] text-white px-5 py-2.5 rounded-full text-sm font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95">✨ Đăng bài</Link>
             )}
-            <button
-              onClick={() => onSwitchRole(role === 'admin' ? 'user' : 'admin')}
-              className="px-4 py-2 text-xs font-bold rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50"
-              title="Chuyển vai trò"
-            >
-              Chế độ: {role === 'admin' ? 'Admin' : 'User'}
-            </button>
           </div>
         </div>
       </div>
@@ -106,6 +99,23 @@ const App: React.FC = () => {
     localStorage.setItem('zenblog_role', role);
   }, [role]);
 
+  // Ensure shared links default to user-mode unless explicitly set
+  useEffect(() => {
+    try {
+      const hash = window.location.hash || '';
+      const query = hash.includes('?') ? hash.split('?')[1] : '';
+      const params = new URLSearchParams(query);
+      const mode = params.get('mode');
+      if (mode === 'admin') {
+        setRole('admin');
+        localStorage.setItem('zenblog_role', 'admin');
+      } else {
+        setRole('user');
+        localStorage.setItem('zenblog_role', 'user');
+      }
+    } catch {}
+  }, []);
+
   // Load shared posts from a static JSON on first load (for Vercel).
   // This ensures deployed site shows all curated posts instead of only
   // localStorage drafts from the developer machine.
@@ -129,14 +139,17 @@ const App: React.FC = () => {
   }, []);
 
   const addPost = (newPost: Post) => {
+    if (role !== 'admin') { alert('Bạn không có quyền tạo bài viết.'); return; }
     setPosts([newPost, ...posts]);
   };
 
   const updatePost = (updatedPost: Post) => {
+    if (role !== 'admin') { alert('Bạn không có quyền sửa bài viết.'); return; }
     setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
   };
 
   const deletePost = (id: string) => {
+    if (role !== 'admin') { alert('Bạn không có quyền xóa bài viết.'); return; }
     setPosts(posts.filter(p => p.id !== id));
   };
 
@@ -145,20 +158,40 @@ const App: React.FC = () => {
     window.location.href = '#/dashboard';
   };
 
+  const RequireAdmin: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const location = useLocation();
+    if (role !== 'admin') {
+      return <Navigate to="/dashboard" state={{ from: location.pathname }} replace />;
+    }
+    return children;
+  };
+
   return (
     <HashRouter>
       <div className="min-h-screen flex flex-col">
-        <Navbar role={role} onSwitchRole={(r) => { setRole(r); localStorage.setItem('zenblog_role', r); }} />
+        <Navbar role={role} />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home posts={posts} />} />
             <Route path="/post/:id" element={<PostView posts={posts} />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/about" element={<About />} />
-            <Route path="/dashboard" element={<UserDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} />} />
-            <Route path="/admin" element={<AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />} />
-            <Route path="/write" element={<WritePost onSave={addPost} posts={posts} />} />
-            <Route path="/write/:id" element={<WritePost onSave={updatePost} posts={posts} />} />
+            <Route path="/dashboard" element={<UserDashboard role={role} posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} />} />
+            <Route path="/admin" element={
+              <RequireAdmin>
+                <AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />
+              </RequireAdmin>
+            } />
+            <Route path="/write" element={
+              <RequireAdmin>
+                <WritePost onSave={addPost} posts={posts} />
+              </RequireAdmin>
+            } />
+            <Route path="/write/:id" element={
+              <RequireAdmin>
+                <WritePost onSave={updatePost} posts={posts} />
+              </RequireAdmin>
+            } />
           </Routes>
         </main>
         <Footer />
