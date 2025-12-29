@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import PostView from './pages/PostView';
 import Portfolio from './pages/Portfolio';
@@ -10,8 +10,10 @@ import UserDashboard from './pages/UserDashboard';
 import WritePost from './pages/WritePost';
 import { Post } from './types';
 import { INITIAL_POSTS } from './constants';
+import { fetchPosts as fetchPostsFromDb, upsertPost as upsertPostToDb, deletePost as deletePostFromDb } from './services/postService';
+import { hasSupabase } from './services/supabaseClient';
 
-const Navbar = () => {
+const Navbar: React.FC<{ role: 'admin' | 'user' }> = ({ role }) => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -30,7 +32,9 @@ const Navbar = () => {
             <Link to="/portfolio" className={`text-sm font-bold transition-all ${isActive('/portfolio') ? 'text-[#B8BDDE] scale-110' : 'text-slate-500 hover:text-[#B8BDDE]'}`}>Portfolio</Link>
             <Link to="/about" className={`text-sm font-bold transition-all ${isActive('/about') ? 'text-[#A6CCE2] scale-110' : 'text-slate-500 hover:text-[#A6CCE2]'}`}>Giới thiệu</Link>
             <Link to="/dashboard" className={`text-sm font-bold transition-all ${isActive('/dashboard') ? 'text-[#DEF7F7] scale-110' : 'text-slate-500 hover:text-[#DEF7F7]'}`}>Dashboard</Link>
-            <Link to="/write" className="bg-[#9DE0E5] text-white px-5 py-2.5 rounded-full text-sm font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95">✨ Đăng bài</Link>
+            {role === 'admin' && (
+              <Link to="/write" className="bg-[#9DE0E5] text-white px-5 py-2.5 rounded-full text-sm font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95">✨ Đăng bài</Link>
+            )}
           </div>
         </div>
       </div>
@@ -97,18 +101,24 @@ const App: React.FC = () => {
     localStorage.setItem('zenblog_role', role);
   }, [role]);
 
-  // Load shared posts from a static JSON on first load (for Vercel).
-  // This ensures deployed site shows all curated posts instead of only
-  // localStorage drafts from the developer machine.
+  // Load shared posts from Supabase if configured; otherwise from static JSON.
+  // Ensures deployed site shows curated content and enables server-side RBAC.
   useEffect(() => {
     const loadSharedPosts = async () => {
       try {
-        // Bust CDN/browser cache to ensure latest content after redeploy
-        const res = await fetch(`/posts.json?v=${Date.now()}`, { cache: 'no-cache' });
-        if (res.ok) {
-          const data = await res.json();
+        if (hasSupabase) {
+          const data = await fetchPostsFromDb();
           if (Array.isArray(data) && data.length) {
             setPosts(prev => (prev.length >= data.length ? prev : data));
+          }
+        } else {
+          // Bust CDN/browser cache to ensure latest content after redeploy
+          const res = await fetch(`/posts.json?v=${Date.now()}`, { cache: 'no-cache' });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length) {
+              setPosts(prev => (prev.length >= data.length ? prev : data));
+            }
           }
         }
       } catch (e) {
@@ -120,16 +130,44 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addPost = (newPost: Post) => {
-    setPosts([newPost, ...posts]);
+  const addPost = async (newPost: Post) => {
+    if (role !== 'admin') return; // client-side guard; server-side enforced via Supabase RLS
+    try {
+      if (hasSupabase) {
+        const saved = await upsertPostToDb(newPost);
+        setPosts([saved, ...posts]);
+      } else {
+        setPosts([newPost, ...posts]);
+      }
+    } catch (e) {
+      // noop: surface errors in UI later
+    }
   };
 
-  const updatePost = (updatedPost: Post) => {
-    setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
+  const updatePost = async (updatedPost: Post) => {
+    if (role !== 'admin') return;
+    try {
+      if (hasSupabase) {
+        const saved = await upsertPostToDb(updatedPost);
+        setPosts(posts.map(p => p.id === saved.id ? saved : p));
+      } else {
+        setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
+      }
+    } catch (e) {
+      // noop
+    }
   };
 
-  const deletePost = (id: string) => {
-    setPosts(posts.filter(p => p.id !== id));
+  const deletePost = async (id: string) => {
+    if (role !== 'admin') return;
+    try {
+      if (hasSupabase) {
+        await deletePostFromDb(id);
+      }
+      setPosts(posts.filter(p => p.id !== id));
+    } catch (e) {
+      // noop
+    }
   };
 
   const logoutToUser = () => {
@@ -137,10 +175,18 @@ const App: React.FC = () => {
     window.location.href = '#/dashboard';
   };
 
+  const RequireAdmin: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const location = useLocation();
+    if (role !== 'admin') {
+      return <Navigate to="/dashboard" state={{ from: location.pathname }} replace />;
+    }
+    return children;
+  };
+
   return (
     <HashRouter>
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <Navbar role={role} />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home posts={posts} />} />
@@ -148,9 +194,21 @@ const App: React.FC = () => {
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/about" element={<About />} />
             <Route path="/dashboard" element={<UserDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} />} />
-            <Route path="/admin" element={<AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />} />
-            <Route path="/write" element={<WritePost onSave={addPost} posts={posts} />} />
-            <Route path="/write/:id" element={<WritePost onSave={updatePost} posts={posts} />} />
+            <Route path="/admin" element={
+              <RequireAdmin>
+                <AdminDashboard posts={posts} onDelete={deletePost} onEdit={(id) => window.location.href = `#/write/${id}`} onLogout={logoutToUser} />
+              </RequireAdmin>
+            } />
+            <Route path="/write" element={
+              <RequireAdmin>
+                <WritePost onSave={addPost} posts={posts} />
+              </RequireAdmin>
+            } />
+            <Route path="/write/:id" element={
+              <RequireAdmin>
+                <WritePost onSave={updatePost} posts={posts} />
+              </RequireAdmin>
+            } />
           </Routes>
         </main>
         <Footer />
